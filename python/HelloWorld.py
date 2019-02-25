@@ -1,6 +1,5 @@
 import asyncio
 from xknx import XKNX
-
 """
 LAMPES
 0/1/1...4
@@ -17,21 +16,18 @@ MDP: maquettefing
 """
 
 
-
-
-
 #fonction callback lors de la reception d'un telegram
 async def telegram_received_cb(telegram):
     print("Telegram received: {0}".format(telegram))
 
-Address = "192.168.1.5"
+Address = "192.168.0.5"
 
 
 async def main():
 #définie la fonction comme asynchrone
     xknx = XKNX(config='xknx.yaml', #fichier d'info de l'objet
             loop=loop, #points to the asyncio.loop object
-            own_address=Address,
+            own_address= Address,
             telegram_received_cb=print("coucou"),
             device_updated_cb=print("truc"))
     
