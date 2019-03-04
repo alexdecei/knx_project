@@ -1,3 +1,4 @@
+console.log("go!")
 var knx = require('knx');
 var connection = knx.Connection({
  handlers: {
