@@ -64,9 +64,7 @@ async function chenillard(nbre, tps){
 }
 
 function sleepSYNC(temps){
-  return(promise1 = new Promise(function(resolve, reject) {
-    setTimeout(temps);
-  }));
+  return new Promise(function(resolve, reject) { setTimeout(function() { resolve('fini');}, temps);});
 }
 
 console.log("coucou2")
