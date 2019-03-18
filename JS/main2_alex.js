@@ -1,4 +1,4 @@
-
+var knx = require('knx');
 console.log("coucou1")
 var connection = new knx.Connection( {
   // ip address and port of the KNX router or interface
@@ -8,7 +8,7 @@ var connection = new knx.Connection( {
   // set the log level for messsages printed on the console. This can be 'error', 'warn', 'info' (default), 'debug', or 'trace'.
   loglevel: 'info',
   // do not automatically connect, but use connection.Connect() to establish connection
-  manualConnect: false, 
+  manualConnect: false,
   // use tunneling with multicast (router) - this is NOT supported by all routers! See README-resilience.md
   forceTunneling: true,
   // wait at least 10 millisec between each datagram
