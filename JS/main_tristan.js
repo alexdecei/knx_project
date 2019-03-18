@@ -13,7 +13,6 @@ var connection = new knx.Connection( {
     connected: function() {
       console.log('Hurray, I can talk KNX!');
 
-
       // WRITE an arbitrary boolean request to a DPT1 group address
 
 
@@ -34,13 +33,16 @@ var connection = new knx.Connection( {
         connection.write("0/1/1", 1);
       }
       if (dest=="0/3/2") {
-        connection.write("0/1/2", 1);
-      }
-      if (dest=="0/3/3") {
         connection.write("0/1/1", 0);
       }
+      if (dest=="0/3/3") {
+        connection.read("0/2/1", (src, responsevalue) => {
+          console.log("### "+src);
+          console.log("#### "+responsevalue);
+        });
+      }
       if (dest=="0/3/4") {
-        connection.write("0/1/2", 0);
+
       }
     },
     // get notified on connection errors
@@ -49,4 +51,35 @@ var connection = new knx.Connection( {
     }
   }
 });
-console.log("coucou2")
+
+async function chenillard(nbre, tps){
+  // Initialisation à 0
+  connection.write("0/1/1", 0);
+  connection.write("0/1/2", 0);
+  connection.write("0/1/3", 0);
+  connection.write("0/1/4", 0);
+  sleepSYNC(250)
+  //Chenillards
+  for (i = 0; i < nbre; i++) {
+    connection.write("0/1/1", 1);
+    sleepSYNC(tps)
+    connection.write("0/1/1", 0);
+    connection.write("0/1/2", 1);
+    sleepSYNC(tps)
+    connection.write("0/1/2", 0);
+    connection.write("0/1/3", 1);
+    sleepSYNC(tps)
+    connection.write("0/1/3", 0);
+    connection.write("0/1/4", 1);
+    sleepSYNC(tps)
+    connection.write("0/1/4", 0);
+  }
+}
+
+function sleepSYNC(temps){
+  return(promise1 = new Promise(function(resolve, reject) {
+    setTimeout(temps);
+  }));
+}
+
+console.log("coucou2");
