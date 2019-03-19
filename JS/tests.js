@@ -1,2 +1,6 @@
-var x = "à".charCodeAt(0)
-console.log(x)
+
+console.log("coucoucouc")
+document.getElementById("test1").innerHTML = "test1Reussi"
+function test() {
+  document.getElementById("test1").innerHTML = "testBoutonReussi"
+}

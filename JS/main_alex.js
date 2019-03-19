@@ -39,7 +39,7 @@ var connection = new knx.Connection( {
   }
 });
 
-async function chenillard(nbre, tps){
+async function chenillard(){
   // Initialisation à 0
   connection.write("0/1/1", 0);
   connection.write("0/1/2", 0);
@@ -63,8 +63,13 @@ async function chenillard(nbre, tps){
   }
 }
 
+
 function sleepSYNC(temps){
   return new Promise(function(resolve, reject) { setTimeout(function() { resolve('fini');}, temps);});
+}
+
+function verifChenillard(){
+  return new Promise(function(resolve, reject) { setTimeout(function() { resolve('fini');}, 10);});
 }
 
 console.log("coucou2")
