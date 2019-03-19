@@ -27,8 +27,10 @@ var connection = new knx.Connection( {
       //  "event: %s, src: %j, dest: %j, value: %j",
       //  evt, src, dest, value
       //);
+
+      // Allumage et extinction du chenillard
       if (dest=="0/3/1") {
-        if (boolChenillard == false || boolChenillardInverse = false) {
+        if (boolChenillard == false && boolChenillardInverse == false) {
           boolChenillardInverse = false;
           chenillard();
         }
@@ -37,10 +39,14 @@ var connection = new knx.Connection( {
           boolChenillardInverse = false;
         }
       }
+
+      // Augmente le délai
       if (dest=="0/3/2") {
         tps+=100;
         console.log(tps);
       }
+
+      // Diminue le délai
       if (dest=="0/3/3") {
         if (tps<=500) { // La limite temporelle des relais est de 500 ms.
           console.log("Impossible de descendre en dessous de 500 ms. Limite atteinte.")
@@ -50,20 +56,16 @@ var connection = new knx.Connection( {
         }
         console.log(tps);
       }
+
+      // Inverse le sens du chenillard
       if (dest=="0/3/4") {
         if (boolChenillard == true) {
           boolChenillard = false;
-          while(secTime!=0) {
-            console.log("## "+secTime);
-          }
-          chenillardInverse();
+          wait(secTime,"arrière");
         }
         else if (boolChenillardInverse == true) {
           boolChenillardInverse = false;
-          while (secTime!=0) {
-              console.log("## "+secTime)
-          }
-          chenillard();
+          wait(secTime,"avant");
         }
       }
     },
@@ -76,46 +78,46 @@ var connection = new knx.Connection( {
 
 async function chenillard(){
   boolChenillard = true;
-  secTime = 4*tps;
   while(boolChenillard) {
+    secTime = 4*tps;
     connection.write("0/1/1", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/1", 0);
     connection.write("0/1/2", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/2", 0);
     connection.write("0/1/3", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/3", 0);
     connection.write("0/1/4", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/4", 0);
   }
 }
 
 async function chenillardInverse() {
   boolChenillardInverse = true;
-  secTime = 4*tps;
   while (boolChenillardInverse) {
+    secTime = 4*tps;
     connection.write("0/1/4", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/4", 0);
     connection.write("0/1/3", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/3", 0);
     connection.write("0/1/2", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/2", 0);
     connection.write("0/1/1", 1);
-    secTime-=tps;
     await sleepSYNC(tps);
+    secTime-=tps;
     connection.write("0/1/1", 0);
   }
 }
@@ -139,6 +141,16 @@ async function init() {
   connection.write("0/1/3", 0);
   connection.write("0/1/4", 0);
   await sleepSYNC(500);
+}
+
+async function wait(temps,sens) {
+  await sleepSYNC(temps);
+  if (sens=="avant") {
+    chenillard();
+  }
+  else if (sens=="arrière") {
+    chenillardInverse();
+  }
 }
 
 function sleepSYNC(temps){
