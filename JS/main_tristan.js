@@ -1,7 +1,10 @@
 var knx = require('knx');
-console.log("coucou1")
+console.log("Tentative de connexion...")
 
-var tps = 800;
+var tps = 1000;
+var secTime = 0;
+var boolChenillard = false;
+var boolChenillardInverse = false;
 
 var connection = new knx.Connection( {
   // ip address and port of the KNX router or interface
@@ -15,39 +18,53 @@ var connection = new knx.Connection( {
     // wait for connection establishment before sending anything!
     connected: function() {
       init();
-      console.log('Hurray, I can talk KNX!');
-
-
-      // WRITE an arbitrary boolean request to a DPT1 group address
-
-
-
-      // you can also issue a READ request and pass a callback to capture the response
-      connection.read("0/3/1", (src, responsevalue) => {
-        console.log(src);
-        console.log(responsevalue);
-      });
-
+      console.log('Connexion à la plateforme KNX réussie !');
+      console.log('______________________________________________________________________________');
     },
     // get notified for all KNX events:
     event: function(evt, src, dest, value) {
-      console.log(
-        "event: %s, src: %j, dest: %j, value: %j",
-        evt, src, dest, value
-      );
+      //console.log(
+      //  "event: %s, src: %j, dest: %j, value: %j",
+      //  evt, src, dest, value
+      //);
       if (dest=="0/3/1") {
-        chenillard();
+        if (boolChenillard == false || boolChenillardInverse = false) {
+          boolChenillardInverse = false;
+          chenillard();
+        }
+        else {
+          boolChenillard = false;
+          boolChenillardInverse = false;
+        }
       }
       if (dest=="0/3/2") {
         tps+=100;
         console.log(tps);
       }
       if (dest=="0/3/3") {
-        tps-=100;
+        if (tps<=500) { // La limite temporelle des relais est de 500 ms.
+          console.log("Impossible de descendre en dessous de 500 ms. Limite atteinte.")
+        }
+        else {
+          tps-=100;
+        }
         console.log(tps);
       }
       if (dest=="0/3/4") {
-        chenillardInverse();
+        if (boolChenillard == true) {
+          boolChenillard = false;
+          while(secTime!=0) {
+            console.log("## "+secTime);
+          }
+          chenillardInverse();
+        }
+        else if (boolChenillardInverse == true) {
+          boolChenillardInverse = false;
+          while (secTime!=0) {
+              console.log("## "+secTime)
+          }
+          chenillard();
+        }
       }
     },
     // get notified on connection errors
@@ -58,34 +75,46 @@ var connection = new knx.Connection( {
 });
 
 async function chenillard(){
-  while(1) {
+  boolChenillard = true;
+  secTime = 4*tps;
+  while(boolChenillard) {
     connection.write("0/1/1", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/1", 0);
     connection.write("0/1/2", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/2", 0);
     connection.write("0/1/3", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/3", 0);
     connection.write("0/1/4", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/4", 0);
   }
 }
 
 async function chenillardInverse() {
-  while (1) {
+  boolChenillardInverse = true;
+  secTime = 4*tps;
+  while (boolChenillardInverse) {
     connection.write("0/1/4", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/4", 0);
     connection.write("0/1/3", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/3", 0);
     connection.write("0/1/2", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/2", 0);
     connection.write("0/1/1", 1);
+    secTime-=tps;
     await sleepSYNC(tps);
     connection.write("0/1/1", 0);
   }
@@ -96,24 +125,22 @@ async function init() {
   connection.write("0/1/2", 0);
   connection.write("0/1/3", 0);
   connection.write("0/1/4", 0);
-  await sleepSYNC(300);
+  await sleepSYNC(500);
   connection.write("0/1/1", 1);
-  await sleepSYNC(300);
+  await sleepSYNC(500);
   connection.write("0/1/2", 1);
-  await sleepSYNC(300);
+  await sleepSYNC(500);
   connection.write("0/1/3", 1);
-  await sleepSYNC(300);
+  await sleepSYNC(500);
   connection.write("0/1/4", 1);
-  await sleepSYNC(750);
+  await sleepSYNC(1000);
   connection.write("0/1/1", 0);
   connection.write("0/1/2", 0);
   connection.write("0/1/3", 0);
   connection.write("0/1/4", 0);
-  await sleepSYNC(300);
+  await sleepSYNC(500);
 }
 
 function sleepSYNC(temps){
   return new Promise(function(resolve, reject) { setTimeout(function() { resolve('fini');}, temps);});
 }
-
-console.log("coucou2");
