@@ -156,3 +156,9 @@ async function wait(temps,sens) {
 function sleepSYNC(temps){
   return new Promise(function(resolve, reject) { setTimeout(function() { resolve('fini');}, temps);});
 }
+
+process.on('SIGINT', function() { // S'active lors d'un CTRL+C
+  connection.Disconnect(); // Ligne à garder, fondement de la déconnexion
+  console.log('Disconnected');
+  process.exit();
+})
