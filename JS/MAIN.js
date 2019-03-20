@@ -1,5 +1,9 @@
 var vitesse = "500";
-var sensInverse = false;
+var knx = require("knx");
+var tps = 1000;
+var secTime = 0;
+var boolChenillard = false;
+var boolChenillardInverse = false;
 
 function recupVitesse() {
   vitesse = document.getElementById("vTemps").value;
@@ -7,30 +11,28 @@ function recupVitesse() {
     vitesse = "500";
   }
   document.getElementById("vTemps2").innerHTML = "Vitesse en ms: " + vitesse;
+  tps = parseInt(vitesse);
 }
 
 function changeSens() {
-  sensInverse = !sensInverse;
+  if (boolChenillard == true) {
+    boolChenillard = false;
+    wait(secTime, "arrière");
+  } else if (boolChenillardInverse == true) {
+    boolChenillardInverse = false;
+    wait(secTime, "avant");
+  }
 }
 
 function demandeConnexion() {
   document.getElementById("idconnexion").innerHTML =
     "<strong> Déconnecté <strong>";
 
-  // if(CONNEXIONETABLIE){
-  //   document.getElementById("idconnexion").innerHTML =
-  //     "<strong> Connecté <strong>";
-  // }
+  connect();
 }
 
-function connect() {
-  var knx = require("knx");
+function connectGlobal() {
   console.log("Tentative de connexion...");
-
-  var tps = 1000;
-  var secTime = 0;
-  var boolChenillard = false;
-  var boolChenillardInverse = false;
 
   var connection = new knx.Connection({
     // ip address and port of the KNX router or interface
@@ -44,6 +46,8 @@ function connect() {
       // wait for connection establishment before sending anything!
       connected: function() {
         init();
+        document.getElementById("idconnexion").innerHTML =
+          "<strong> Connecté <strong>";
         console.log("Connexion à la plateforme KNX réussie !");
         console.log(
           "______________________________________________________________________________"
@@ -51,10 +55,13 @@ function connect() {
       },
       // get notified for all KNX events:
       event: function(evt, src, dest, value) {
-        //console.log(
-        //  "event: %s, src: %j, dest: %j, value: %j",
-        //  evt, src, dest, value
-        //);
+        console.log(
+          "event: %s, src: %j, dest: %j, value: %j",
+          evt,
+          src,
+          dest,
+          value
+        );
 
         // Allumage et extinction du chenillard
         if (dest == "0/3/1") {
@@ -104,3 +111,108 @@ function connect() {
     }
   });
 }
+
+async function chenillard() {
+  boolChenillard = true;
+  while (boolChenillard) {
+    secTime = 4 * tps;
+    connection.write("0/1/1", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/1", 0);
+    connection.write("0/1/2", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/2", 0);
+    connection.write("0/1/3", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/3", 0);
+    connection.write("0/1/4", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/4", 0);
+  }
+}
+
+async function chenillardInverse() {
+  boolChenillardInverse = true;
+  while (boolChenillardInverse) {
+    secTime = 4 * tps;
+    connection.write("0/1/4", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/4", 0);
+    connection.write("0/1/3", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/3", 0);
+    connection.write("0/1/2", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/2", 0);
+    connection.write("0/1/1", 1);
+    await sleepSYNC(tps);
+    secTime -= tps;
+    connection.write("0/1/1", 0);
+  }
+}
+
+async function init() {
+  connection.write("0/1/1", 0);
+  connection.write("0/1/2", 0);
+  connection.write("0/1/3", 0);
+  connection.write("0/1/4", 0);
+  await sleepSYNC(500);
+  connection.write("0/1/1", 1);
+  await sleepSYNC(500);
+  connection.write("0/1/2", 1);
+  await sleepSYNC(500);
+  connection.write("0/1/3", 1);
+  await sleepSYNC(500);
+  connection.write("0/1/4", 1);
+  await sleepSYNC(1000);
+  connection.write("0/1/1", 0);
+  connection.write("0/1/2", 0);
+  connection.write("0/1/3", 0);
+  connection.write("0/1/4", 0);
+  await sleepSYNC(500);
+}
+
+async function wait(temps, sens) {
+  await sleepSYNC(temps);
+  if (sens == "avant") {
+    chenillard();
+  } else if (sens == "arrière") {
+    chenillardInverse();
+  }
+}
+
+function sleepSYNC(temps) {
+  return new Promise(function(resolve, reject) {
+    setTimeout(function() {
+      resolve("fini");
+    }, temps);
+  });
+}
+
+process.stdin.on("readable", () => {
+  process.stdin.resume();
+  process.stdin.setEncoding("UTF8");
+  const chunk = process.stdin.read();
+  const cmd = chunk.toString().substring(0, chunk.toString().length - 2); // On élimine le /r/n
+  if (cmd !== null) {
+    if (cmd.indexOf("/") != -1) {
+      // Si il y a un /, on traite la commande différemment
+      var opt = cmd.split("/")[1]; // On garde ce qui est après le /
+      switch (true) {
+        case opt == "disconnect":
+          connection.Disconnect(); // Ligne à garder, fondement de la déconnexion
+          console.log(
+            "Déconnexion réussie. Merci de votre passage chez KNX. Veuillez taper CTRL+C pour terminer la session."
+          );
+          break;
+      }
+    }
+  }
+});
