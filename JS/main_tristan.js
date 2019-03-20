@@ -1,5 +1,5 @@
 var knx = require('knx');
-console.log("Tentative de connexion...")
+console.log("Tentative de connexion...");
 
 var tps = 1000;
 var secTime = 0;
@@ -23,10 +23,10 @@ var connection = new knx.Connection( {
     },
     // get notified for all KNX events:
     event: function(evt, src, dest, value) {
-      //console.log(
-      //  "event: %s, src: %j, dest: %j, value: %j",
-      //  evt, src, dest, value
-      //);
+      console.log(
+        "event: %s, src: %j, dest: %j, value: %j",
+        evt, src, dest, value
+      );
 
       // Allumage et extinction du chenillard
       if (dest=="0/3/1") {
@@ -75,6 +75,7 @@ var connection = new knx.Connection( {
     }
   }
 });
+
 
 async function chenillard(){
   boolChenillard = true;
@@ -157,8 +158,21 @@ function sleepSYNC(temps){
   return new Promise(function(resolve, reject) { setTimeout(function() { resolve('fini');}, temps);});
 }
 
-process.on('SIGINT', function() { // S'active lors d'un CTRL+C
-  connection.Disconnect(); // Ligne à garder, fondement de la déconnexion
-  console.log('Disconnected');
-  process.exit();
-})
+process.stdin.on('readable', () => {
+	process.stdin.resume();
+	process.stdin.setEncoding('UTF8');
+  const chunk = process.stdin.read();
+  const cmd = chunk.toString().substring(0,chunk.toString().length-2); // On élimine le /r/n
+  if (cmd!== null) {
+		if (cmd.indexOf('/')!=-1) 			// Si il y a un /, on traite la commande différemment
+		{
+      var opt = cmd.split('/')[1];	// On garde ce qui est après le /
+			switch(true) {
+				case (opt=='disconnect'):
+          connection.Disconnect(); // Ligne à garder, fondement de la déconnexion
+          console.log('Déconnexion réussie. Merci de votre passage chez KNX. Veuillez taper CTRL+C pour terminer la session.');
+					break;
+      }
+    }
+  }
+});
