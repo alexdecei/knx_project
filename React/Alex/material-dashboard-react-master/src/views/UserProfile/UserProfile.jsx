@@ -58,7 +58,7 @@ function UserProfile(props) {
 
                   />
 
-                  <a id="vitesseChenillard"> {SimpleSlider.a}</a>
+                  <a id="vitesseChenillard"> {SimpleSlider.value}</a>
                 </GridItem>
               </GridContainer>
             </CardBody>
