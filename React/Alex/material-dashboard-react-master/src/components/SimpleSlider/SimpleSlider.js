@@ -4,6 +4,7 @@ import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider';
+const a = 20;
 
 const styles = {
   root: {
@@ -16,7 +17,7 @@ const styles = {
 
 class SimpleSlider extends React.Component {
   state = {
-    value: 50,
+    value: 0,
   };
 
   handleChange = (event, value) => {
@@ -29,12 +30,15 @@ class SimpleSlider extends React.Component {
 
     return (
       <div className={classes.root}>
-        <Typography id="label">Vitesse</Typography>
+        <Typography id="label">Vitesse: {value} ms</Typography>
+
         <Slider
           classes={{ container: classes.slider }}
           value={value}
           aria-labelledby="label"
           onChange={this.handleChange}
+          max="5000"
+          step="10"
         />
       </div>
     );

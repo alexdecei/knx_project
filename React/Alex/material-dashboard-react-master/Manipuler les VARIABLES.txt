@@ -1,0 +1,83 @@
+
+---------------------------------------------------------
+TRANSFERT DE VARIABLES ENTRE COMPONENTS
+---------------------------------------------------------
+Structure suivante:
+App
+ |
+ |__ InputBar
+ |
+ |__ ToDoList
+       |
+       |__ToDoItem
+
+
+
+
+*PARENT-->ENFANT
+(dans app.js)
+return (
+    <div>
+         <ToDoList VariableDansTodolist={VariableDansApp}/>
+    </div>
+
+(dans ToDoList.js)
+this.props.VariableDansTodolist
+
+
+
+
+*ENFANT-->PARENT
+1.definir un callBack dans le parent
+(dans ToDoList.js)
+myCallback = (varableRecuperée) => {
+    [utilisation de la variable enfant récupérée]
+},
+render() {
+    return (
+        <div>
+             <ToDoItem callbackParent={this.myCallback}/>
+        </div>
+    );
+}
+
+2.passer le callBack en prop dans l'enfant avec la variable en argument
+(dans ToDoItem.js)
+someFn = () => {
+    var variableEnfant;
+    this.props.callbackParent(variableEnfant);
+},
+render() {
+    [...]
+}
+
+
+/!\/!\/!\/!\
+3. pour eviter le callBack et donc utiliser la variable partout
+
+constructor(props) {
+    super(props);
+    this.state = {
+        variableEnfant: null
+    };
+},
+
+myCallback = (variableRecup) => {
+    this.setState({ variableEnfant: variableRecup });
+},
+
+[on peut desormais utiliser partout avec this.state.variableEnfant]
+
+render() {
+    return (
+        <div>
+             <ToDoItem callbackParent={this.myCallback}/>
+        </div>
+    );
+}
+
+
+
+*FRERE-->FRERE
+utiliser les 2 methodes, avec le parent comme intermediaire
+-> ces 2 components ne sont effectivement pas liés directement
