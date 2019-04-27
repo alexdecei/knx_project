@@ -12,6 +12,7 @@ import Danger from "components/Typography/Danger.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
+import LightStatesBar from "components/LightStatesBar/LightStatesBar.jsx";
 
 const style = {
   typo: {
@@ -52,9 +53,9 @@ const style = {
 function TypographyPage(props) {
   const { classes } = props;
   return (
-    <Card>
+    <LightStatesBar>
 
-    </Card>
+    </LightStatesBar>
   );
 }
 
