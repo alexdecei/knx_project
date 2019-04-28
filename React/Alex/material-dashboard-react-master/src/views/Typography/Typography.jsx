@@ -1,44 +1,25 @@
 import React from "react";
+import PropTypes from "prop-types";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
 // core components
-import Quote from "components/Typography/Quote.jsx";
-import Muted from "components/Typography/Muted.jsx";
-import Primary from "components/Typography/Primary.jsx";
-import Info from "components/Typography/Info.jsx";
-import Success from "components/Typography/Success.jsx";
-import Warning from "components/Typography/Warning.jsx";
-import Danger from "components/Typography/Danger.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
-import LightStatesBar from "components/LightStatesBar/LightStatesBar.jsx";
+import Light from "components/Light/Light.jsx";
 
-const style = {
-  typo: {
-    paddingLeft: "25%",
-    marginBottom: "40px",
-    position: "relative"
-  },
-  note: {
-    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
-    bottom: "10px",
-    color: "#c0c1c2",
-    display: "block",
-    fontWeight: "400",
-    fontSize: "13px",
-    lineHeight: "13px",
-    left: "0",
-    marginLeft: "20px",
-    position: "absolute",
-    width: "260px"
-  },
+const styles = {
   cardCategoryWhite: {
-    color: "rgba(255,255,255,.62)",
-    margin: "0",
-    fontSize: "14px",
-    marginTop: "0",
-    marginBottom: "0"
+    "&,& a,& a:hover,& a:focus": {
+      color: "rgba(255,255,255,.62)",
+      margin: "0",
+      fontSize: "14px",
+      marginTop: "0",
+      marginBottom: "0"
+    },
+    "& a,& a:hover,& a:focus": {
+      color: "#FFFFFF"
+    }
   },
   cardTitleWhite: {
     color: "#FFFFFF",
@@ -47,16 +28,50 @@ const style = {
     fontWeight: "300",
     fontFamily: "'Roboto', 'Helvetica', 'Arial', sans-serif",
     marginBottom: "3px",
-    textDecoration: "none"
+    textDecoration: "none",
+    "& small": {
+      color: "#777",
+      fontSize: "65%",
+      fontWeight: "400",
+      lineHeight: "1"
+    }
   }
 };
-function TypographyPage(props) {
-  const { classes } = props;
-  return (
-    <LightStatesBar>
 
-    </LightStatesBar>
-  );
+class Typography extends React.Component {
+  state = {
+    lightstate:false
+  };
+
+  handleLightClick = state => {
+    this.setState({lightstate: state});
+  };
+
+  render () {
+    const {classes} = this.props;
+    return (
+      <div>
+        <Card>
+          <CardHeader color="primary">
+            <h4 className={classes.cardTitleWhite}>État des lampes</h4>
+            <p className={classes.cardCategoryWhite}>
+              Cliquez sur les lampes pour les allumer ou les éteindre.
+            </p>
+          </CardHeader>
+          <CardBody>
+            <Light
+              state={this.lightstate}
+              onClick={this.handleLightClick}
+            />
+          </CardBody>
+        </Card>
+      </div>
+    );
+  }
 }
 
-export default withStyles(style)(TypographyPage);
+Typography.propTypes = {
+  classes: PropTypes.object.isRequired
+}
+
+export default withStyles(styles)(Typography);

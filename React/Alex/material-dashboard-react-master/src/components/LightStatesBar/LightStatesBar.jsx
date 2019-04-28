@@ -7,7 +7,10 @@ import cardStyle from "assets/jss/material-dashboard-react/components/cardStyle.
 
 function LightStatesBar ({...props}) {
   return (
-
+    <div classname>
+      <span>
+      </span>
+    </div>
   );
 }
 
@@ -15,4 +18,4 @@ LightStatesBar.propTypes = {
   onClick: PropTypes.func.isRequired,
 }
 
-export default withStyles(cardStyle)(Card);
+export default withStyles(cardStyle)(LightStatesBar);
