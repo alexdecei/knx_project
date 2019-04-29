@@ -39,13 +39,16 @@ const styles = {
 };
 
 class Typography extends React.Component {
-  state = {
-    lightstate:false
-  };
+  constructor(props) {
+    super(props);
+    this.state = {
+      lightstate: true
+    };
+  }
 
-  handleLightClick = state => {
-    this.setState({lightstate: state});
-  };
+  handleLightClick(state) {
+    console.log(state, 'clicked')
+  }
 
   render () {
     const {classes} = this.props;

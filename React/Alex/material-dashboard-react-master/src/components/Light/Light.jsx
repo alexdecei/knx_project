@@ -1,6 +1,8 @@
 import React from "react";
 import PropTypes from 'prop-types';
 
+//import './Light.css'
+
 // core components
 
 const ON = '💡'
@@ -8,7 +10,7 @@ const OFF = '❌'
 const UNKNOWN = '❓'
 
 const Light = ({id, state, onClick}) => (
-  <div className="light" onClick={() => onClick}>
+  <div className="light" onClick={() => onClick(state)}>
     <span className="symbol">
       {state ? ON : OFF}
     </span>
