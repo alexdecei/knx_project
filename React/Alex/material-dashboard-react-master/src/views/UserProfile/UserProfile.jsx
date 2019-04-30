@@ -37,6 +37,7 @@ const styles = {
 };
 
 function UserProfile(props) {
+
   const { classes } = props;
   return (
     <div>
@@ -53,12 +54,9 @@ function UserProfile(props) {
               <GridContainer>
                 <GridItem xs={12} sm={12} md={5}>
 
-                  <SimpleSlider
+                  <SimpleSlider/>
 
-
-                  />
-
-                  <a id="vitesseChenillard"> {SimpleSlider.value}</a>
+                  <a id="vitesseChenillard"> oui</a>
                 </GridItem>
               </GridContainer>
             </CardBody>
