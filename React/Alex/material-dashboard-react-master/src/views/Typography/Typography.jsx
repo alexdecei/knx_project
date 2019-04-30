@@ -7,8 +7,9 @@ import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import Light from "components/Light/Light.jsx";
+import { OnOff } from "react-on-off";
 
-//import './Typography.css'
+import './Typography.css'
 
 const styles = {
   cardCategoryWhite: {
@@ -43,20 +44,34 @@ const styles = {
 class Typography extends React.Component {
   constructor(props) {
     super(props);
+    //var list_id = ["0/1/1","0/1/2","0/1/3","0/1/4"]
     this.state = {
-      lightstate: true
+      lightstate: true,
+      currentLight: "0/1/1"
     };
+  }
+
+  symbols = this.generateLights(4);
+
+
+  generateLights(numberOfLights) {
+    const result = []
+    for (var i=1;i<(numberOfLights+1);i++) {
+      result.push(false)
+    }
+    return result
+  }
+
+  getFeedbackForCard(index) {
+    const { lightstate } = this.state
+
   }
 
   handleLightClick = index => {
     const { lightstate } = this.state
     console.log('clicked')
-    if (lightstate === true) {
-      this.setState({ lightstate: false })
-    }
-    else {
-      this.setState({ lightstate: true });
-    }
+
+    this.setState({currentLight:index});
   }
 
   render () {
@@ -71,26 +86,43 @@ class Typography extends React.Component {
             </p>
           </CardHeader>
           <CardBody>
-            <Light
-              id="0/1/1"
-              state={this.state.lightstate}
-              onClick={this.handleLightClick}
-            />
-            <Light
-              id="0/1/2"
-              state={this.state.lightstate}
-              onClick={this.handleLightClick}
-            />
-            <Light
-              id="0/1/3"
-              state={this.state.lightstate}
-              onClick={this.handleLightClick}
-            />
-            <Light
-              id="0/1/4"
-              state={this.state.lightstate}
-              onClick={this.handleLightClick}
-            />
+            {this.symbols.map((symbol, index) => (
+              <Light
+                id={"0/1/"+(index+1)}
+                state={this.getFeedbackForCard(index)}
+                onClick={this.handleLightClick}
+              />
+            ))}
+            <span className="onoff">
+              <OnOff>
+                {({ on, toggle }) => (
+                  <>
+                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                  </>
+                )}
+              </OnOff>
+              <OnOff>
+                {({ on, toggle }) => (
+                  <>
+                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                  </>
+                )}
+              </OnOff>
+              <OnOff>
+                {({ on, toggle }) => (
+                  <>
+                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                  </>
+                )}
+              </OnOff>
+              <OnOff>
+                {({ on, toggle }) => (
+                  <>
+                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                  </>
+                )}
+              </OnOff>
+            </span>
           </CardBody>
         </Card>
       </div>

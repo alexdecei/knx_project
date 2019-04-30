@@ -1,7 +1,6 @@
-.typography {
+.onoff {
+  font-size: 2em;
+
   display: flex;
-  flex-wrap: wrap;
-  width: 300px;
-  margin: auto;
-  user-select: none;
+  cursor: default;
 }
