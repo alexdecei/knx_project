@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import PropTypes from "prop-types";
 // @material-ui/core components
 import withStyles from "@material-ui/core/styles/withStyles";
@@ -7,6 +7,8 @@ import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import Light from "components/Light/Light.jsx";
+
+//import './Typography.css'
 
 const styles = {
   cardCategoryWhite: {
@@ -46,8 +48,15 @@ class Typography extends React.Component {
     };
   }
 
-  handleLightClick(state) {
-    console.log(state, 'clicked')
+  handleLightClick = index => {
+    const { lightstate } = this.state
+    console.log('clicked')
+    if (lightstate === true) {
+      this.setState({ lightstate: false })
+    }
+    else {
+      this.setState({ lightstate: true });
+    }
   }
 
   render () {
@@ -63,7 +72,23 @@ class Typography extends React.Component {
           </CardHeader>
           <CardBody>
             <Light
-              state={this.lightstate}
+              id="0/1/1"
+              state={this.state.lightstate}
+              onClick={this.handleLightClick}
+            />
+            <Light
+              id="0/1/2"
+              state={this.state.lightstate}
+              onClick={this.handleLightClick}
+            />
+            <Light
+              id="0/1/3"
+              state={this.state.lightstate}
+              onClick={this.handleLightClick}
+            />
+            <Light
+              id="0/1/4"
+              state={this.state.lightstate}
               onClick={this.handleLightClick}
             />
           </CardBody>
