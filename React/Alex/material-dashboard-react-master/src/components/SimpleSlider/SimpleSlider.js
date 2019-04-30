@@ -5,6 +5,7 @@ import { withStyles } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider';
 
+
 const styles = {
   root: {
     width: 300,
@@ -21,6 +22,7 @@ class SimpleSlider extends React.Component {
 
   handleChange = (event, value) => {
     this.setState({ value });
+    console.log('vitesse: '+ value);
   };
 
   render() {

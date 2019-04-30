@@ -36,40 +36,53 @@ const styles = {
   }
 };
 
-function UserProfile(props) {
+class UserProfile extends React.Component {
+  constructor(props) {
+    super(props);
+    this.handleClick = this.handleClick.bind(this);
+    this.state = {
+      vitesse: 700
+    };
 
-  const { classes } = props;
-  return (
-    <div>
-      <GridContainer>
-        <GridItem xs={12} sm={12} md={8}>
-          <Card>
+    }
 
-            <CardHeader color="primary">
-              <h4 className={classes.cardTitleWhite}>Modifier le chenillard</h4>
-              <p className={classes.cardCategoryWhite}>La vitesse va de 500ms à 5 secondes.</p>
-            </CardHeader>
+  handleClick() {
+    console.log('Click happened');
+  }
+  render () {
+    const { classes } = this.props;
+    return (
+      <div>
+        <GridContainer>
+          <GridItem xs={12} sm={12} md={8}>
+            <Card>
 
-            <CardBody>
-              <GridContainer>
-                <GridItem xs={12} sm={12} md={5}>
+              <CardHeader color="primary">
+                <h4 className={classes.cardTitleWhite}>Modifier le chenillard</h4>
+                <p className={classes.cardCategoryWhite}>La vitesse va de 500ms à 5 secondes.</p>
+              </CardHeader>
 
-                  <SimpleSlider/>
+              <CardBody>
+                <GridContainer>
+                  <GridItem xs={12} sm={12} md={5}>
 
-                  <a id="vitesseChenillard"> oui</a>
-                </GridItem>
-              </GridContainer>
-            </CardBody>
+                    <SimpleSlider/>
 
-            <CardFooter>
-              <Button color="primary">Changer sens</Button>
-            </CardFooter>
+                    <a id="vitesseChenillard"> oui</a>
+                  </GridItem>
+                </GridContainer>
+              </CardBody>
 
-          </Card>
-        </GridItem>
-      </GridContainer>
-    </div>
-  );
+              <CardFooter>
+                <Button color="primary" onClick={this.handleClick}>Changer sens</Button>
+              </CardFooter>
+
+            </Card>
+          </GridItem>
+        </GridContainer>
+      </div>
+    );
+  }
 }
 
 export default withStyles(styles)(UserProfile);
