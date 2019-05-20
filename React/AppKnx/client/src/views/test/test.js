@@ -23,10 +23,10 @@ class App extends Component {
     const response = await fetch("/api/world", {
       method: "POST",
       headers: {
+        "id": "texte",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ post: this.state.post } ),
-      id: "blabla"
     });
     const body = await response.text();
     this.setState({ responseToPost: body });

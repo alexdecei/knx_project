@@ -40,10 +40,10 @@ class SimpleSlider extends React.Component {
     const response = await fetch("/api/world", {
       method: "POST",
       headers: {
+        "id": "vitesse",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ post: this.state.value }),
-      id: "vitesseChenillard"
+      body: JSON.stringify({ post: this.state.value.toString() })
     });
     const body = await response.text();
     this.setState({ responseToPost: body });
