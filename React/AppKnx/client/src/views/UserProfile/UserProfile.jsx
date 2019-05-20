@@ -72,7 +72,7 @@ class UserProfile extends React.Component {
     const body = await response.text();
     this.setState({ responseToPost: body });
   };
-  /////////////////BACKEND/////////////////////
+  /////////////////FRONTEND/////////////////////
 
   handleClick() {
     //console.log("Click happened");
