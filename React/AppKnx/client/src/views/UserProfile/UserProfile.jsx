@@ -64,10 +64,10 @@ class UserProfile extends React.Component {
     const response = await fetch("/api/world", {
       method: "POST",
       headers: {
+        "id": "sens",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({ post: "" }),
-      id: "sens"
     });
     const body = await response.text();
     this.setState({ responseToPost: body });

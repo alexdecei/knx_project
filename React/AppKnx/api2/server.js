@@ -16,25 +16,74 @@ app.get('/api/hello', (req, res) => {
   res.send({ express: 'Hello From Michel' });
 });
 
+
 app.post('/api/world', (req, res) => {
+  //var u=req.headers.id
   switch (req.headers.id) {
     case "vitesse":
-      if(req.body.post=0){
+      if(parseInt(req.body.post)==0){
         boolChenillard = false;
         tableauChenillard = [0,0,0,0];
-        boolChenillard = false;
       }
-      else if(req.body.post>500){
+      else if(parseInt(req.body.post)>500){
         tps =req.body.post;
-        if(!boolChenillard){chenillard()}
+        if(!boolChenillard){
+          tableauChenillard = [1,2,3,4];
+          chenillard()
+        }
 
       }
       else{
         tps=500;
-        if(!boolChenillard){chenillard()}
+        if(!boolChenillard){
+          tableauChenillard = [1,2,3,4];
+          chenillard()
+        }
       }
       break;
-    case "texte":
+    case "sens":
+        if (boolChenillard == true) {
+          
+          boolChenillard = false;
+          boolChenillardInverse = true;
+
+          if (i==0) {
+            i+=3;
+          }
+          else if (i==1) {
+            i+=1;
+          }
+          else if (i==2) {
+            i-=1;
+          }
+          else {
+            i-=3;
+          }
+          
+          
+          tableauChenillard = [4,3,2,1];
+        }
+        else if (boolChenillardInverse == true) {
+          
+          boolChenillardInverse = false;
+          boolChenillard = true;
+          if (i==0) {
+            i+=3;
+          }
+          else if (i==1) {
+            i+=1;
+          }
+          else if (i==2) {
+            i-=1;
+          }
+          else {
+            i-=3;
+          }
+
+          tableauChenillard = [1,2,3,4];
+          
+        }
+      
         
       break;
     case "vitesse":
@@ -46,6 +95,7 @@ app.post('/api/world', (req, res) => {
       break;
   }
 
+  console.log(req.headers.id)
   console.log(req.body.post)
   res.send(
     `reçu: ${req.body.post}`,
