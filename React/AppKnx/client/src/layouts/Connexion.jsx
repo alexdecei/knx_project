@@ -107,6 +107,7 @@ class SignIn extends React.Component {
     isConnected: false,
     notifierDeco: false,
     notifierCo: false,
+    notifierDecoVoulue: false
     }
 
 
@@ -123,18 +124,20 @@ class SignIn extends React.Component {
     return body;
   };
 
-  sendIsconnect = async e => {
+  disconnect = async e => {
     e.preventDefault();
     const response = await fetch("/api/world", {
       method: "POST",
       headers: {
-        id: "connected",
+        id: "disconnect",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ post: this.isConnected })
+      body: JSON.stringify({ post: true })
     });
     const body = await response.text();
     this.setState({ responseToPost: body });
+    this.setState({ notifierDecoVoulue: true });
+    
 
   };
   
@@ -186,6 +189,10 @@ class SignIn extends React.Component {
     this.setState({ notifierDeco: false });
   };
 
+  handleCloseDecoVoulue = () => {
+    this.setState({ notifierDecoVoulue: false });
+  };
+
   componentWillUnmount() {
     clearTimeout(this.timer);
   }
@@ -218,6 +225,21 @@ class SignIn extends React.Component {
         />
       </Snackbar>
 
+      <Snackbar
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left',
+        }}
+        open={this.state.notifierDecoVoulue}
+        autoHideDuration={4000}
+        onClose={this.handleCloseDecoVoulue}
+      >
+        <MySnackbarContentWrapper
+          onClose={this.handleCloseDecoVoulue}
+          variant="warning"
+          message="Déconnexion de la maquette."
+        />
+      </Snackbar>
       
       <Snackbar
         anchorOrigin={{
@@ -277,6 +299,11 @@ class SignIn extends React.Component {
               className={classes.submit}
             >
               {loading ? 'Connexion en cours...' : 'Connexion'}
+            </Button>
+            <p />
+            <p />
+            <Button onClick={this.disconnect} color="secondary" variant="contained">
+              Déconnexion
             </Button>
             <p />
             <p />

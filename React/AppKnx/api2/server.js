@@ -63,45 +63,12 @@ app.post('/api/world', (req, res) => {
       break;
     case "sens":
         if (boolChenillard == true) {
-          
           boolChenillard = false;
           boolChenillardInverse = true;
-
-          if (i==0) {
-            i+=3;
-          }
-          else if (i==1) {
-            i+=1;
-          }
-          else if (i==2) {
-            i-=1;
-          }
-          else {
-            i-=3;
-          }
-          
-          
-          tableauChenillard = [4,3,2,1];
         }
         else if (boolChenillardInverse == true) {
-          
           boolChenillardInverse = false;
           boolChenillard = true;
-          if (i==0) {
-            i+=3;
-          }
-          else if (i==1) {
-            i+=1;
-          }
-          else if (i==2) {
-            i-=1;
-          }
-          else {
-            i-=3;
-          }
-
-          tableauChenillard = [1,2,3,4];
-          
         }
       
         
@@ -111,12 +78,17 @@ app.post('/api/world', (req, res) => {
         ipPortPara= req.body.post.slice(0,4)
         console.log(ipAddrPara)
         console.log(ipPortPara)
+      break;
+    
+    case "disconnect":
+        connection.Disconnect();
+        isConnected=false
+      break;
 
-      break;
-    
     case "vitesse":
-    
-      break;
+  
+        break;
+        
     
     default:
       break;
@@ -158,33 +130,36 @@ var connection = new knx.Connection( {
   ipAddr: ipAddrPara, ipPort: ipPortPara,
   loglevel: 'info',
   handlers: {
+    // wait for connection establishment before sending anything!
     connected: function() {
+      isConnected=true
       init();
-      isConnected=true,
-
       console.log('Connexion à la plateforme KNX réussie !');
       console.log('______________________________________________________________________________');
     },
-
-    //GESTION DES EVENEMENTS KNX
+    // get notified for all KNX events:
     event: function(evt, src, dest, value) {
 
-      //recuperation des sorties
+      // 
       if (dest == "0/2/1") {
         let obj = JSON.parse(JSON.stringify(value));
-        console.log("0/2/1 :"+obj.data[0]);
+        tableauLampes[0]=obj.data[0];
+        printTableauLampes();
       }
       if (dest == "0/2/2") {
         let obj = JSON.parse(JSON.stringify(value));
-        console.log("0/2/2 :"+obj.data[0]);
+        tableauLampes[1]=obj.data[0];
+        printTableauLampes();
       }
       if (dest == "0/2/3") {
         let obj = JSON.parse(JSON.stringify(value));
-        console.log("0/2/3 :"+obj.data[0]);
+        tableauLampes[2]=obj.data[0];
+        printTableauLampes();
       }
       if (dest == "0/2/4") {
         let obj = JSON.parse(JSON.stringify(value));
-        console.log("0/2/4 :"+obj.data[0]);
+        tableauLampes[3]=obj.data[0];
+        printTableauLampes();
       }
 
       // Allumage et extinction du chenillard
@@ -220,46 +195,13 @@ var connection = new knx.Connection( {
 
       // Inverse le sens du chenillard
       if (dest=="0/3/4") {
-        if (boolChenillard == true) {
-          /*
+        if (boolChenillard) {
           boolChenillard = false;
           boolChenillardInverse = true;
-
-          if (i==0) {
-            i+=3;
-          }
-          else if (i==1) {
-            i+=1;
-          }
-          else if (i==2) {
-            i-=1;
-          }
-          else {
-            i-=3;
-          }
-          */
-          
-          //tableauChenillard = [4,3,2,1];
         }
-        else if (boolChenillardInverse == true) {
-          /*
+        else if (boolChenillardInverse) {
           boolChenillardInverse = false;
           boolChenillard = true;
-          if (i==0) {
-            i+=3;
-          }
-          else if (i==1) {
-            i+=1;
-          }
-          else if (i==2) {
-            i-=1;
-          }
-          else {
-            i-=3;
-          }
-
-          tableauChenillard = [1,2,3,4];
-          */
         }
       }
     },
@@ -270,22 +212,6 @@ var connection = new knx.Connection( {
   }
 });
 
-
-
-
-function applyTableauLampes() {
-  for (var i=0; i<tableauLampes.length;i++) {
-    if (tableauLampes[i]==0) {
-      connection.write("0/1/"+(i+1),0);
-    }
-    else if (tableauLampes[i]==1) {
-      connection.write("0/1/"+(i+1),1);
-    }
-    else {
-      console.log("Action inconnue ("+tableauLampes[i]+") sur le composant 0/1/"+(i+1)+".");
-    }
-  }
-}
 
 function printTableauLampes() {
   tempStr = "État des lampes :\n  ";
@@ -307,25 +233,43 @@ function printTableauLampes() {
 async function chenillard(){
   boolChenillard = true;
   while(boolChenillard || boolChenillardInverse) {
-    for (i=0;i<tableauChenillard.length;i++) {
+    for (i=0;i<tableauChenillard.length;) {
       connection.write("0/1/"+tableauChenillard[i],1);
       await sleepSYNC(tps);
       connection.write("0/1/"+tableauChenillard[i],0);
+      if (boolChenillard) {
+        i++;
+      }
+      else if(boolChenillardInverse) {
+        i--;
+      }
     }
   }
 }
 
-async function chenillardInverse() {
-  boolChenillardInverse = true;
-  while (boolChenillardInverse) {
-    for (var i=tableauLampes.length-1;i>-1;i--) {
-      tableauLampes[i]=1;
-      applyTableauLampes();
-      printTableauLampes();
-      tableauLampes[i]=0;
-      await sleepSYNC(tps);
-      secTime-=tps;
-    }
+async function pari(numeroChoisi) {
+  var tableauPari = [1,2,3,4];
+  var length = tableauPari.length;
+  
+  allLightsOn();
+  await sleepSYNC(2000);
+  
+  for(var i=0;i<length-1;i++) {
+    var rand = Math.floor(Math.random() * tableauPari.length);
+    console.log(rand, tableauPari);
+    connection.write("0/1/"+tableauPari[rand],0);
+    tableauPari.splice(rand,1);
+    await sleepSYNC(750);
+    console.log(rand, tableauPari);
+  }
+
+  if (tableauPari[0]==numeroChoisi) {
+    console.log("GAGNÉ ! Vous avez GAGNÉ le droit de REJOUER !");
+    return true;
+  }
+  else {
+    console.log("PERDU... Ce jeu est peu marrant...")
+    return false;
   }
 }
 
@@ -350,14 +294,18 @@ async function init() {
   await sleepSYNC(500);
 }
 
-async function wait(temps,sens) {
-  await sleepSYNC(temps);
-  if (sens=="avant") {
-    chenillard();
-  }
-  else if (sens=="arrière") {
-    chenillardInverse();
-  }
+function allLightsOn() {
+  connection.write("0/1/1", 1);
+  connection.write("0/1/2", 1);
+  connection.write("0/1/3", 1);
+  connection.write("0/1/4", 1);
+}
+
+function allLightsOff() {
+  connection.write("0/1/1", 0);
+  connection.write("0/1/2", 0);
+  connection.write("0/1/3", 0);
+  connection.write("0/1/4", 0);
 }
 
 function sleepSYNC(temps){
@@ -376,7 +324,6 @@ process.stdin.on('readable', () => {
       var opt = cmd.split('/')[1].toLowerCase();	// On garde ce qui est après le /
 			switch(true) {
 				case (opt=='disconnect'):
-          
           connection.Disconnect(); // Ligne à garder, fondement de la déconnexion
           isConnected=false
           console.log('Déconnexion réussie. Merci de votre passage chez KNX. Veuillez taper CTRL+C pour terminer la session.');
@@ -400,6 +347,17 @@ process.stdin.on('readable', () => {
           else {console.log('Le chenillard n\'est pas allumé');}
           break;
 
+        case (opt=='inverse'):
+          if (boolChenillard) {
+            boolChenillard = false;
+            boolChenillardInverse = true;
+          }
+          else if (boolChenillardInverse) {
+            boolChenillardInverse = false;
+            boolChenillard = true;
+          }
+          break;
+
         case (opt=='vitesse'):
           var speed = cmd.split('/')[2];
           if (speed<500) { // La limite temporelle des relais est de 500 ms.
@@ -413,15 +371,37 @@ process.stdin.on('readable', () => {
         case (opt=='lampe'):
           var numero = cmd.split('/')[2];
           var OnOff = cmd.split('/')[3].toLowerCase();
+          if (numero in ['1','2','3','4']) {
+            if (OnOff=='on') {
+              connection.write("0/1/"+numero, 1);
+            }
+            else if (OnOff=='off') {
+              connection.write("0/1/"+numero, 0);
+            }
+            else {console.log('Option non reconnue.')}
+          }
+          else {console.log("La lampe n'existe pas.")}
+          break;
+
+        case (opt=='alllights'):
+          var OnOff = cmd.split('/')[2].toLowerCase();
           if (OnOff=='on') {
-            connection.write("0/1/"+numero, 1);
-            //await sleepSYNC(400); // Temps d'attente par sécurité
+            allLightsOn();
           }
           else if (OnOff=='off') {
-            connection.write("0/1/"+numero, 0);
-
+            allLightsOff();
           }
+          else {console.log('Option non reconnue.')}
           break;
+
+        case (opt=='pari'):
+          var numeroChoisi = cmd.split('/')[2]
+          pari(numeroChoisi);
+          break;
+        
+        default:
+          console.log("Commande inconnue. Veuillez recommencer.")
+          console.log("Liste des options disponibles :   \n\t[chenillard]\t\t\tEnclenche le chenillard.           \n\t[stop]\t\t\t\tArrête le chenillard.           \n\t[inverse]\t\t\tInverse le sens du chenillard.           \n\t[vitesse/<vitesse>]\t\tSpécifie la vitesse du chenillard.           \n\t[lampe/<n°lampe>/<on/off>]\tAllume ou éteint la lampe spécifiée.           \n\t[alllights/<on/off>]\t\tAllume ou éteint toutes les lampes.           \n\t[disconnect]\t\t\tDéconnecte de la maquette.   \n\t[pari/<numeroLampe>]\t\t\tDémarre le jeu de pari avec une mise sur <numeroLampe>.");
       }
     }
   }

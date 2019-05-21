@@ -9,7 +9,7 @@ import CardBody from "components/Card/CardBody.jsx";
 import Light from "components/Light/Light.jsx";
 import { OnOff } from "react-on-off";
 
-import './Typography.css'
+import "./Typography.css";
 
 const styles = {
   cardCategoryWhite: {
@@ -47,35 +47,65 @@ class Typography extends React.Component {
     //var list_id = ["0/1/1","0/1/2","0/1/3","0/1/4"]
     this.state = {
       lightstate: true,
-      currentLight: "0/1/1"
+      currentLight: "0/1/1",
+      response: "",
+      post: "",
+      responseToPost: ""
     };
   }
 
   symbols = this.generateLights(4);
 
-
   generateLights(numberOfLights) {
-    const result = []
-    for (var i=1;i<(numberOfLights+1);i++) {
-      result.push(false)
+    const result = [];
+    for (var i = 1; i < numberOfLights + 1; i++) {
+      result.push(false);
     }
-    return result
+    return result;
   }
 
   getFeedbackForCard(index) {
-    const { lightstate } = this.state
-
+    const { lightstate } = this.state;
   }
 
   handleLightClick = index => {
-    const { lightstate } = this.state
-    console.log('clicked')
+    const { lightstate } = this.state;
+    console.log("clicked");
 
-    this.setState({currentLight:index});
+    this.setState({ currentLight: index });
+  };
+
+
+
+  componentDidMount() {
+    this.callApi()
+      .then(res => this.setState({ response: res.express }))
+      .catch(err => console.log(err));
   }
+  callApi = async () => {
+    const response = await fetch("/api/hello");
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+  handleSubmit = async e => {
+    e.preventDefault();
+    const response = await fetch("/api/world", {
+      method: "POST",
+      headers: {
+        id: "texte",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ post: this.state.post })
+    });
+    const body = await response.text();
+    this.setState({ responseToPost: body });
+  };
 
-  render () {
-    const {classes} = this.props;
+
+
+  render() {
+    const { classes } = this.props;
     return (
       <div>
         <Card>
@@ -86,13 +116,6 @@ class Typography extends React.Component {
             </p>
           </CardHeader>
           <CardBody>
-            {this.symbols.map((symbol, index) => (
-              <Light
-                id={"0/1/"+(index+1)}
-                state={this.getFeedbackForCard(index)}
-                onClick={this.handleLightClick}
-              />
-            ))}
             <span className="onoff">
               <OnOff>
                 {({ on, toggle }) => (
@@ -132,6 +155,6 @@ class Typography extends React.Component {
 
 Typography.propTypes = {
   classes: PropTypes.object.isRequired
-}
+};
 
 export default withStyles(styles)(Typography);
