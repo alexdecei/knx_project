@@ -41,6 +41,7 @@ const styles = {
   }
 };
 
+
 class Typography extends React.Component {
   constructor(props) {
     super(props);
@@ -51,15 +52,18 @@ class Typography extends React.Component {
     };
   }
 
-  symbols = this.generateLights(4);
-
 
   generateLights(numberOfLights) {
-    const result = []
-    for (var i=1;i<(numberOfLights+1);i++) {
-      result.push(false)
+    var indents = [];
+    for (var i = 0; i < numberOfLights; i++) {
+
+      indents.push(<OnOff>
+        {({ on, toggle }) => (
+            <h1 onClick={(event, list) => {toggle();console.log("bonjour lampe "+i);}}>{on ? "💡" : "❌"}</h1>
+        )}
+      </OnOff>);
     }
-    return result
+    return indents;
   }
 
   getFeedbackForCard(index) {
@@ -74,6 +78,32 @@ class Typography extends React.Component {
     this.setState({currentLight:index});
   }
 
+  ////////////////////BACKEND//////////////////
+  componentDidMount() {
+    this.callApi()
+      .then(res => this.setState({ response: res.express }))
+      .catch(err => console.log(err));
+  }
+  callApi = async () => {
+    const response = await fetch("/api/hello");
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+  handleSubmit = async e => {
+    e.preventDefault();
+    const response = await fetch("/api/world", {
+      method: "POST",
+      headers: {
+        "id": "vitesse",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ post: this.state.value.toString() })
+    });
+    const body = await response.text();
+    this.setState({ responseToPost: body });
+  };
+
   render () {
     const {classes} = this.props;
     return (
@@ -86,40 +116,25 @@ class Typography extends React.Component {
             </p>
           </CardHeader>
           <CardBody>
-            {this.symbols.map((symbol, index) => (
-              <Light
-                id={"0/1/"+(index+1)}
-                state={this.getFeedbackForCard(index)}
-                onClick={this.handleLightClick}
-              />
-            ))}
             <span className="onoff">
               <OnOff>
                 {({ on, toggle }) => (
-                  <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
-                  </>
+                    <h1 onClick={(event, list) => {toggle();this.handleSubmit();console.log("bonjour lampe 1");}}>{on ? "💡" : "❌"}</h1>
                 )}
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
-                  <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
-                  </>
+                    <h1 onClick={(event, list) => {toggle();this.handleSubmit();console.log("bonjour lampe 2");}} value={on ? "💡" : "❌"}></h1>
                 )}
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
-                  <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
-                  </>
+                    <h1 onClick={(event, list) => {toggle();this.handleSubmit();console.log("bonjour lampe 3");}}>{on ? "💡" : "❌"}</h1>
                 )}
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
-                  <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
-                  </>
+                    <h1 onClick={(event, list) => {toggle();this.handleSubmit();console.log("bonjour lampe 4");}}>{on ? "💡" : "❌"}</h1>
                 )}
               </OnOff>
             </span>
