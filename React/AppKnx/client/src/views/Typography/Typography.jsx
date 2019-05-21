@@ -88,6 +88,7 @@ class Typography extends React.Component {
     const response = await fetch("/api/hello");
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
+    console.log(body);
     return body;
   };
   handleSubmit = async e => {
@@ -98,7 +99,7 @@ class Typography extends React.Component {
         "id": "vitesse",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ post: this.state.value.toString() })
+      body: JSON.stringify({ post: this.props.on.toString() })
     });
     const body = await response.text();
     this.setState({ responseToPost: body });
@@ -116,6 +117,7 @@ class Typography extends React.Component {
             </p>
           </CardHeader>
           <CardBody>
+            <button onClick={(event) => {this.callApi()}}>TEST GET</button>
             <span className="onoff">
               <OnOff>
                 {({ on, toggle }) => (
@@ -124,7 +126,7 @@ class Typography extends React.Component {
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
-                    <h1 onClick={(event, list) => {toggle();this.handleSubmit();console.log("bonjour lampe 2");}} value={on ? "💡" : "❌"}></h1>
+                    <h1 onClick={(event, list) => {toggle();this.handleSubmit();console.log("bonjour lampe 2");}}>{on ? "💡" : "❌"}</h1>
                 )}
               </OnOff>
               <OnOff>
