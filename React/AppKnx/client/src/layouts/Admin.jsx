@@ -11,7 +11,6 @@ import withStyles from "@material-ui/core/styles/withStyles";
 import Navbar from "components/Navbars/Navbar.jsx";
 import Footer from "components/Footer/Footer.jsx";
 import Sidebar from "components/Sidebar/Sidebar.jsx";
-import Notifier from "components/Notification/Notifier.js";
 import FixedPlugin from "components/FixedPlugin/FixedPlugin.jsx";
 
 import routes from "routes.js";
@@ -131,7 +130,6 @@ class Dashboard extends React.Component {
     return (
       <div className={classes.wrapper}>
         {/* <h1>{this.state.response}</h1> */}
-        <Notifier />
         <Sidebar
           routes={routes}
           logoText={"Free KNX"}

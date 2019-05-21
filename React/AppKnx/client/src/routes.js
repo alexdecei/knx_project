@@ -8,7 +8,6 @@ import DashboardPage from "views/Dashboard/Dashboard.jsx";
 import UserProfile from "views/UserProfile/UserProfile.jsx";
 import test from "views/test/test.js";
 import Typography from "views/Typography/Typography.jsx";
-import Connexion from "./views/Connexion/Connexion";
 
 const dashboardRoutes = [
   {
@@ -37,13 +36,6 @@ const dashboardRoutes = [
     name: "Test TRISTAN",
     icon: LibraryBooks,
     component: Typography,
-    layout: "/admin"
-  },
-  {
-    path: "/Connexion",
-    name: "Connexion",
-    icon: BubbleChart,
-    component: Connexion,
     layout: "/admin"
   }
 ];

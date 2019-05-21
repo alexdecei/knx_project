@@ -7,13 +7,33 @@ const port = process.env.PORT || 5000;
 
 
 
+var tps = 1000;
+var boolChenillard = false;
+var boolChenillardInverse = false;
+var i=0;
+var tableauLampes = [0,0,0,0];
+var tableauChenillard = [1,2,3,4];
+var tps = 1000;
+var isConnected=false
+var ipAddrPara = "192.168.1.5" ;
+var ipPortPara = "3671";
+
+function infoSens() {
+  return (boolChenillardInverse ? "indirect" : "direct");
+}
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // API calls
 app.get('/api/hello', (req, res) => {
-  res.send({ express: 'Hello From Michel' });
+  var etatGeneral={
+    "vitesse": tps,
+    "sens": infoSens(),
+    "isConnected": isConnected
+  }
+  res.send({ express: etatGeneral });
 });
 
 
@@ -86,10 +106,17 @@ app.post('/api/world', (req, res) => {
       
         
       break;
-    case "vitesse":
-      
-      break;
+    case "connect":
+        ipAddrPara= req.body.post.slice(4)
+        ipPortPara= req.body.post.slice(0,4)
+        console.log(ipAddrPara)
+        console.log(ipPortPara)
 
+      break;
+    
+    case "vitesse":
+    
+      break;
     
     default:
       break;
@@ -98,7 +125,7 @@ app.post('/api/world', (req, res) => {
   console.log(req.headers.id)
   console.log(req.body.post)
   res.send(
-    `reçu: ${req.body.post}`,
+    `${req.body}`,
   );
 });
 
@@ -126,22 +153,15 @@ app.listen(port, () => console.log(`Listening on port ${port}`));
 var knx = require('knx');
 console.log("Tentative de connexion...");
 
-var tps = 1000;
-var secTime = 0;
-var boolChenillard = false;
-var boolChenillardInverse = false;
-var i=0;
-
-var tableauLampes = [0,0,0,0];
-var tableauChenillard = [1,2,3,4];
 
 var connection = new knx.Connection( {
-  ipAddr: '192.168.1.5', ipPort: 3671,
+  ipAddr: ipAddrPara, ipPort: ipPortPara,
   loglevel: 'info',
-
   handlers: {
     connected: function() {
       init();
+      isConnected=true,
+
       console.log('Connexion à la plateforme KNX réussie !');
       console.log('______________________________________________________________________________');
     },
@@ -356,7 +376,9 @@ process.stdin.on('readable', () => {
       var opt = cmd.split('/')[1].toLowerCase();	// On garde ce qui est après le /
 			switch(true) {
 				case (opt=='disconnect'):
+          
           connection.Disconnect(); // Ligne à garder, fondement de la déconnexion
+          isConnected=false
           console.log('Déconnexion réussie. Merci de votre passage chez KNX. Veuillez taper CTRL+C pour terminer la session.');
           break;
 

@@ -8,44 +8,58 @@ import Icon from "@material-ui/core/Icon";
 // @material-ui/icons
 import Store from "@material-ui/icons/Store";
 import Warning from "@material-ui/icons/Warning";
-import DateRange from "@material-ui/icons/DateRange";
-import LocalOffer from "@material-ui/icons/LocalOffer";
 import Update from "@material-ui/icons/Update";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
 import AccessTime from "@material-ui/icons/AccessTime";
 import Accessibility from "@material-ui/icons/Accessibility";
-// import Build from "@material-ui/icons/Build";
-// import Flash_on from "@material-ui/icons/Flash";
-import BugReport from "@material-ui/icons/BugReport";
-import Code from "@material-ui/icons/Code";
-import Cloud from "@material-ui/icons/Cloud";
 // core components
 import GridItem from "components/Grid/GridItem.jsx";
 import GridContainer from "components/Grid/GridContainer.jsx";
-import Table from "components/Table/Table.jsx";
-import Tasks from "components/Tasks/Tasks.jsx";
-import CustomTabs from "components/CustomTabs/CustomTabs.jsx";
-import Danger from "components/Typography/Danger.jsx";
 import Card from "components/Card/Card.jsx";
 import CardHeader from "components/Card/CardHeader.jsx";
 import CardIcon from "components/Card/CardIcon.jsx";
 import CardBody from "components/Card/CardBody.jsx";
 import CardFooter from "components/Card/CardFooter.jsx";
+import Notifier from "components/Notification/Notifier.js";
+import Notifierfdfd from "components/Notification/Notifierfdfd.js";
 
-import { bugs, website, server } from "variables/general.jsx";
-
-import {
-  dailySalesChart,
-  emailsSubscriptionChart,
-  completedTasksChart
-} from "variables/charts.jsx";
+import { dailySalesChart } from "variables/charts.jsx";
 
 import dashboardStyle from "assets/jss/material-dashboard-react/views/dashboardStyle.jsx";
 
 class Dashboard extends React.Component {
   state = {
-    value: 0
+    value: 0,
+    response: "",
+    post: "",
+    responseToPost: ""
   };
+
+  componentDidMount() {
+    this.callApi()
+      .then(res => this.setState({ response: res.express }))
+      .catch(err => console.log(err));
+  }
+  callApi = async () => {
+    const response = await fetch("/api/hello");
+    const body = await response.json();
+    if (response.status !== 200) throw Error(body.message);
+    return body;
+  };
+  handleSubmit = async e => {
+    e.preventDefault();
+    const response = await fetch("/api/world", {
+      method: "POST",
+      headers: {
+        id: "texte",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ post: this.state.post })
+    });
+    const body = await response.text();
+    this.setState({ responseToPost: body });
+  };
+
   handleChange = (event, value) => {
     this.setState({ value });
   };
@@ -53,11 +67,13 @@ class Dashboard extends React.Component {
   handleChangeIndex = index => {
     this.setState({ value: index });
   };
+
   render() {
     const { classes } = this.props;
     return (
       <div>
         <GridContainer>
+          {this.state.response.isConnected ? <Notifier /> : <Notifierfdfd />}
           <GridItem xs={12} sm={6} md={3}>
             <Card>
               <CardHeader color="success" stats icon>
@@ -81,8 +97,10 @@ class Dashboard extends React.Component {
                 <CardIcon color="danger">
                   <Icon>info_outline</Icon>
                 </CardIcon>
-                <p className={classes.cardCategory}>Parties jouées</p>
-                <h3 className={classes.cardTitle}>75</h3>
+                <p className={classes.cardCategory}>Sens du chenillard</p>
+                <h3 className={classes.cardTitle}>
+                  {this.state.response.sens}
+                </h3>
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>
@@ -99,7 +117,9 @@ class Dashboard extends React.Component {
                   <Accessibility />
                 </CardIcon>
                 <p className={classes.cardCategory}>Vitesse</p>
-                <h3 className={classes.cardTitle}>550</h3>
+                <h3 className={classes.cardTitle}>
+                  {this.state.response.vitesse}
+                </h3>
               </CardHeader>
               <CardFooter stats>
                 <div className={classes.stats}>
