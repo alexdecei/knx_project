@@ -106,7 +106,7 @@ app.post('/api/world', (req, res) => {
       
         
       break;
-    case "connect":
+    case "idConnect":
         ipAddrPara= req.body.post.slice(4)
         ipPortPara= req.body.post.slice(0,4)
         console.log(ipAddrPara)
