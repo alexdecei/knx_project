@@ -85,10 +85,19 @@ app.post('/api/world', (req, res) => {
         isConnected=false
       break;
 
-    case "vitesse":
+    case "allumer":
+      var lamp=req.headers.body.slice(0,1)
+      var on= + (req.headers.body.slice(1)=="true") // string>>bool>>int avec +
+      connection.write("0/1/"+num, on);
+
+      
   
         break;
-        
+    
+    case "vitesse":
+
+        break;
+    
     
     default:
       break;

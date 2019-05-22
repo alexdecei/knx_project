@@ -84,7 +84,6 @@ class Typography extends React.Component {
     const response = await fetch("/api/hello");
     const body = await response.json();
     if (response.status !== 200) throw Error(body.message);
-    console.log(body);
     return body;
   };
 
@@ -113,7 +112,6 @@ class Typography extends React.Component {
             </p>
           </CardHeader>
           <CardBody>
-            <button onClick={(event) => {this.callApi()}}>TEST GET</button>
             <span className="onoff">
               <OnOff>
                 {({ on, toggle }) => (
