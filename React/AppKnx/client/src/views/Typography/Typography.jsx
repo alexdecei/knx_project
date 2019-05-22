@@ -75,8 +75,6 @@ class Typography extends React.Component {
     this.setState({ currentLight: index });
   };
 
-
-
   componentDidMount() {
     this.callApi()
       .then(res => this.setState({ response: res.express }))
@@ -88,21 +86,19 @@ class Typography extends React.Component {
     if (response.status !== 200) throw Error(body.message);
     return body;
   };
-  handleSubmit = async e => {
-    e.preventDefault();
+
+  handleSubmit = async (lamp, on) => {
     const response = await fetch("/api/world", {
       method: "POST",
       headers: {
-        id: "texte",
+        id: "allumer",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ post: this.state.post })
+      body: JSON.stringify({ post: lamp + on.toString() })
     });
     const body = await response.text();
     this.setState({ responseToPost: body });
   };
-
-
 
   render() {
     const { classes } = this.props;
@@ -120,28 +116,36 @@ class Typography extends React.Component {
               <OnOff>
                 {({ on, toggle }) => (
                   <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                    <h1 onClick={(this.handleSubmit(1, on), toggle)}>
+                      {on ? "💡" : "❌"}
+                    </h1>
                   </>
                 )}
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
                   <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                    <h1 onClick={(this.handleSubmit(2, on), toggle)}>
+                      {on ? "💡" : "❌"}
+                    </h1>
                   </>
                 )}
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
                   <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                    <h1 onClick={(this.handleSubmit(3, on), toggle)}>
+                      {on ? "💡" : "❌"}
+                    </h1>
                   </>
                 )}
               </OnOff>
               <OnOff>
                 {({ on, toggle }) => (
                   <>
-                    <h1 onClick={toggle}>{on ? "💡" : "❌"}</h1>
+                    <h1 onClick={(this.handleSubmit(4, on), toggle)}>
+                      {on ? "💡" : "❌"}
+                    </h1>
                   </>
                 )}
               </OnOff>
