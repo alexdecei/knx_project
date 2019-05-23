@@ -4,6 +4,8 @@ console.log("Tentative de connexion...");
 var tps = 1000;
 var boolChenillard = false;
 var boolChenillardInverse = false;
+var boolGameEnable = false;
+var points;
 
 var tableauLampes = [0,0,0,0];        // Donne l'état instantanné des lampes
 var tableauChenillard = [1,2,3,4];    // Tableau qui donne le numéro des lampes à allumer
@@ -48,46 +50,61 @@ var connection = new knx.Connection( {
         printTableauLampes();
       }
 
-      // Allumage et extinction du chenillard
-      if (dest=="0/3/1") {
-        if (boolChenillard == false && boolChenillardInverse == false) {
-          tableauChenillard = [1,2,3,4];
-          boolChenillardInverse = false;
-          chenillard();
+      if (boolGameEnable == false) {
+        // Allumage et extinction du chenillard
+        if (dest=="0/3/1") {
+          if (boolChenillard == false && boolChenillardInverse == false) {
+            tableauChenillard = [1,2,3,4];
+            boolChenillardInverse = false;
+            chenillard();
+          }
+          else {
+            tableauChenillard = [0,0,0,0];
+            boolChenillard = false;
+            boolChenillardInverse = false;
+          }
         }
-        else {
-          tableauChenillard = [0,0,0,0];
-          boolChenillard = false;
-          boolChenillardInverse = false;
+
+        // Augmente le délai
+        if (dest=="0/3/2") {
+          tps+=100;
+          console.log(tps);
+        }
+
+        // Diminue le délai
+        if (dest=="0/3/3") {
+          if (tps<=500) { // La limite temporelle des relais est de 500 ms.
+            console.log("Impossible de descendre en dessous de 500 ms. Limite atteinte.")
+          }
+          else {
+            tps-=100;
+          }
+          console.log(tps);
+        }
+
+        // Inverse le sens du chenillard
+        if (dest=="0/3/4") {
+          if (boolChenillard) {
+            boolChenillard = false;
+            boolChenillardInverse = true;
+          }
+          else if (boolChenillardInverse) {
+            boolChenillardInverse = false;
+            boolChenillard = true;
+          }
         }
       }
-
-      // Augmente le délai
-      if (dest=="0/3/2") {
-        tps+=100;
-        console.log(tps);
-      }
-
-      // Diminue le délai
-      if (dest=="0/3/3") {
-        if (tps<=500) { // La limite temporelle des relais est de 500 ms.
-          console.log("Impossible de descendre en dessous de 500 ms. Limite atteinte.")
-        }
-        else {
-          tps-=100;
-        }
-        console.log(tps);
-      }
-
-      // Inverse le sens du chenillard
-      if (dest=="0/3/4") {
-        if (boolChenillard) {
-          boolChenillard = false;
-          boolChenillardInverse = true;
-        }
-        else if (boolChenillardInverse) {
-          boolChenillardInverse = false;
-          boolChenillard = true;
+      else {
+        for (var k=0; k<tableauLampes.length; k++) {
+          if (dest=="0/3/"+(k+1)) {
+            if (tableauLampes[k]==1) {
+              console.log("A temps !");
+              points++;
+            }
+            else {
+              console.log("Trop tard :/");
+            }
+          }
         }
       }
     },
@@ -118,16 +135,20 @@ function printTableauLampes() {
 
 async function chenillard(){
   boolChenillard = true;
+  var i=0;
   while(boolChenillard || boolChenillardInverse) {
-    for (i=0;i<tableauChenillard.length;) {
+    for (;;) {
       connection.write("0/1/"+tableauChenillard[i],1);
       await sleepSYNC(tps);
       connection.write("0/1/"+tableauChenillard[i],0);
       if (boolChenillard) {
         i++;
+        if (i>=tableauChenillard.length) {i=0;break;}
       }
       else if(boolChenillardInverse) {
         i--;
+        if (i<0) {i=tableauChenillard.length-1;break;}
+        
       }
     }
   }
@@ -142,11 +163,9 @@ async function pari(numeroChoisi) {
   
   for(var i=0;i<length-1;i++) {
     var rand = Math.floor(Math.random() * tableauPari.length);
-    console.log(rand, tableauPari);
     connection.write("0/1/"+tableauPari[rand],0);
     tableauPari.splice(rand,1);
     await sleepSYNC(750);
-    console.log(rand, tableauPari);
   }
 
   if (tableauPari[0]==numeroChoisi) {
@@ -156,6 +175,30 @@ async function pari(numeroChoisi) {
   else {
     console.log("PERDU... Ce jeu est peu marrant...")
     return false;
+  }
+}
+
+async function tapeTaupe(nbTaupes) {
+  // Séquence d'initialisation
+  points = 0;
+  console.log("PRÊT...");
+  allLightsOn();
+  await sleepSYNC(1000);
+  console.log("PARTEZ !");
+  allLightsOff();
+  await sleepSYNC(500);
+  var rand;
+  var time = 500+((nbTaupes*100)/2);
+
+  // Boucle avec tirage aléatoire de la position de la taupe
+  for (var taupe=0;taupe<nbTaupes;taupe++) {
+    rand = Math.floor(Math.random() * tableauLampes.length);
+    connection.write("0/1/"+(rand+1),1);
+    await sleepSYNC(time);
+    connection.write("0/1/"+(rand+1),0);
+    if (time>=600) {
+      time=time-100;
+    }
   }
 }
 
@@ -256,7 +299,7 @@ process.stdin.on('readable', () => {
         case (opt=='lampe'):
           var numero = cmd.split('/')[2];
           var OnOff = cmd.split('/')[3].toLowerCase();
-          if (numero in ['1','2','3','4']) {
+          if (numero>=1 && numero<=4) {
             if (OnOff=='on') {
               connection.write("0/1/"+numero, 1);
             }
@@ -280,13 +323,31 @@ process.stdin.on('readable', () => {
           break;
 
         case (opt=='pari'):
-          var numeroChoisi = cmd.split('/')[2]
-          pari(numeroChoisi);
+          var numeroChoisi = cmd.split('/')[2];
+          if (numeroChoisi != null) {
+            pari(numeroChoisi);
+          }
+          else {
+            console.log("Vous n'avez pas écrit la lampe sur laquelle vous voulez parier.");
+          }
+          break;
+
+        case (opt=='taupe'):
+          boolGameEnable = true;
+          console.log("Jouez avec les interrupteurs. Dès qu'une lampe s'allume, appuyez sur l'interrupteur correspondant.")
+          var nbTaupes = cmd.split('/')[2];
+          if (nbTaupes != null) {
+            tapeTaupe(nbTaupes);
+            console.log("Vous avez exterminé "+points+" taupes sur ${nbTaupes}.");
+          }
+          else {
+            console.log("Vous n'avez pas rentré le nombre de taupes à taper.");
+          }
           break;
         
         default:
           console.log("Commande inconnue. Veuillez recommencer.")
-          console.log("Liste des options disponibles :   \n\t[chenillard]\t\t\tEnclenche le chenillard.           \n\t[stop]\t\t\t\tArrête le chenillard.           \n\t[inverse]\t\t\tInverse le sens du chenillard.           \n\t[vitesse/<vitesse>]\t\tSpécifie la vitesse du chenillard.           \n\t[lampe/<n°lampe>/<on/off>]\tAllume ou éteint la lampe spécifiée.           \n\t[alllights/<on/off>]\t\tAllume ou éteint toutes les lampes.           \n\t[disconnect]\t\t\tDéconnecte de la maquette.   \n\t[pari/<numeroLampe>]\t\t\tDémarre le jeu de pari avec une mise sur <numeroLampe>.");
+          console.log("Liste des options disponibles :   \n\t[chenillard]\t\t\tEnclenche le chenillard.           \n\t[stop]\t\t\t\tArrête le chenillard.           \n\t[inverse]\t\t\tInverse le sens du chenillard.           \n\t[vitesse/<vitesse>]\t\tSpécifie la vitesse du chenillard.           \n\t[lampe/<n°lampe>/<on/off>]\tAllume ou éteint la lampe spécifiée.           \n\t[alllights/<on/off>]\t\tAllume ou éteint toutes les lampes.           \n\t[disconnect]\t\t\tDéconnecte de la maquette.   \n\t[pari/<numeroLampe>]\t\tDémarre le jeu de pari avec une mise sur <numeroLampe>.  \n\t[taupe/<nb_taupes>]\t\tEnclenche le tape-taupes avec <nb_taupes> à taper.");
       }
     }
   }
